@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Tournament Manager - Group Stage</title>
     <style>
+        /* Basic Styling */
         body {
             font-family: sans-serif;
             line-height: 1.6;
@@ -24,13 +25,13 @@
         }
         .group-container h3 { /* Group Name */
             margin-top: 0;
-            margin-bottom: 15px; /* Space below group name */
+            margin-bottom: 15px;
             border-bottom: 1px solid #eee;
             padding-bottom: 5px;
         }
          /* Standings Table Styling */
         .standings-table-container {
-            margin-bottom: 20px; /* Space between table and matches */
+            margin-bottom: 20px;
         }
         .standings-table {
             width: 100%;
@@ -49,13 +50,11 @@
             background-color: #e9e9e9;
             font-weight: bold;
         }
-        .standings-table td:nth-child(1) { /* Team Name */
-            width: auto; /* Allow team name to take most space */
-        }
+        .standings-table td:nth-child(1) { width: auto; } /* Team Name */
         .standings-table td:nth-child(2), /* Pts */
         .standings-table td:nth-child(3), /* Played */
         .standings-table td:nth-child(4) { /* Diff */
-            width: 60px; /* Fixed width for numerical columns */
+            width: 60px;
             text-align: center;
         }
         /* Matches Styling */
@@ -102,19 +101,31 @@
             font-weight: bold;
             margin-top: 10px;
             margin-bottom: 15px; /* Space below error */
+            min-height: 1.2em;
         }
-        #backButton {
-             margin-top: 20px;
-             padding: 8px 15px;
-             background-color: #6c757d;
-             color: white;
-             border: none;
-             cursor: pointer;
-             border-radius: 3px;
-         }
-         #backButton:hover {
-             background-color: #5a6268;
-         }
+        #navigation-area { /* Container for buttons */
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex; /* Align buttons */
+            gap: 15px; /* Space between buttons */
+            flex-wrap: wrap; /* Allow wrapping */
+        }
+        #backButton, #clearTournamentBtn { /* Style action buttons */
+              padding: 10px 20px;
+              color: white;
+              border: none;
+              cursor: pointer;
+              border-radius: 3px;
+              font-size: 1em;
+        }
+        #backButton { background-color: #6c757d; }
+        #backButton:hover { background-color: #5a6268; }
+        #clearTournamentBtn { /* Style for clear button */
+            background-color: #dc3545; /* Red */
+            margin-left: auto; /* Push to the right */
+        }
+         #clearTournamentBtn:hover { background-color: #c82333; }
 
     </style>
 </head>
@@ -126,7 +137,11 @@
         <!-- Groups with standings tables and matches will be inserted here -->
     </div>
 
-    <button id="backButton">Back to Setup</button>
+    <!-- Button Area -->
+    <div id="navigation-area">
+        <button id="backButton">Back to Setup</button>
+        <button id="clearTournamentBtn">Clear Tournament Data</button> <!-- Added Clear Button -->
+    </div>
 
     <script src="group_stage.js"></script>
 </body>
