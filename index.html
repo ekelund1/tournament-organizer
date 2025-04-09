@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Tournament Manager - Setup</title>
+    <style>
+        /* ... existing styles ... */
+        body { font-family: sans-serif; line-height: 1.6; margin: 20px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        label.inline-label { display: inline-block; margin-top: 5px; margin-right: 5px; font-weight: normal; }
+        input[type="number"], textarea, select { /* Added select */
+            width: 95%; padding: 8px; margin-top: 5px; margin-bottom: 10px;
+            border: 1px solid #ccc; max-width: 400px; box-sizing: border-box; /* Ensure padding doesn't expand */
+        }
+        input[type="checkbox"] { margin-right: 3px; vertical-align: middle; }
+        textarea { height: 150px; resize: vertical; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; margin-top: 15px; border-radius: 3px;}
+        button:hover { background-color: #0056b3; }
+        #tournamentOutput { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+        .group { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; background-color: #f9f9f9; }
+        .group h3 { margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .group h4 { margin-top: 15px; margin-bottom: 5px; color: #333; }
+        .group ul { list-style: none; padding: 0; margin-bottom: 10px; }
+        .group li { padding: 3px 0; }
+        .match-pair { font-family: monospace; white-space: pre; }
+        .referee { color: #555; font-style: italic; font-size: 0.9em; }
+        .error { color: red; font-weight: bold; margin-top: 10px; }
+        #navigationButtons { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        #goToGroupStageBtn { background-color: #28a745; padding: 12px 25px; font-size: 1.1em; }
+        #goToGroupStageBtn:hover { background-color: #218838; }
+        #goToGroupStageBtn:disabled { background-color: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <h1>Tournament Setup</h1>
+
+    <div id="inputSection">
+        <label for="numTeams">Number of Teams:</label>
+        <input type="number" id="numTeams" name="numTeams" min="2" value="8">
+
+        <label for="teamNames">Team Names (one per line, highest rank first):</label>
+        <textarea id="teamNames" name="teamNames" placeholder="Team 1
+Team 2
+Team 3
+..."></textarea>
+
+        <label for="numGroups">Number of Groups:</label>
+        <input type="number" id="numGroups" name="numGroups" min="1" value="2">
+
+        <div>
+             <input type="checkbox" id="assignRefs" name="assignRefs">
+             <label for="assignRefs" class="inline-label">Assign referees from non-playing teams</label>
+        </div>
+
+        <hr style="margin-top: 20px;">
+
+        <button id="generateButton">Generate Groups & Matches</button>
+        <div id="errorMessages" class="error"></div>
+    </div>
+
+    <div id="tournamentOutput">
+        <!-- Tournament structure displayed here -->
+    </div>
+
+    <div id="navigationButtons">
+         <button id="goToGroupStageBtn" disabled>Go to Group Stage Input</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
