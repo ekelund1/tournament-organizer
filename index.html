@@ -124,6 +124,11 @@
         }
         #clearTournamentBtn:hover { background-color: #c82333; }
 
+        /* --- NEW STYLE FOR CHECKBOX CONTAINER --- */
+        .checkbox-option {
+            margin-top: 10px; /* Add some space above checkbox options */
+        }
+
     </style>
 </head>
 <body>
@@ -143,10 +148,17 @@ Team 3
         <label for="numGroups">Number of Groups:</label>
         <input type="number" id="numGroups" name="numGroups" min="1" value="2">
 
-        <div>
+        <!-- --- CHECKBOX OPTIONS --- -->
+        <div class="checkbox-option">
              <input type="checkbox" id="assignRefs" name="assignRefs">
              <label for="assignRefs" class="inline-label">Assign referees from non-playing teams</label>
         </div>
+        <div class="checkbox-option">
+             <input type="checkbox" id="shortenGroupStage" name="shortenGroupStage">
+             <label for="shortenGroupStage" class="inline-label">Shorten group stage (play exactly 2 sets)</label>
+        </div>
+        <!-- --- END CHECKBOX OPTIONS --- -->
+
 
         <button id="generateButton">Generate Groups & Matches</button>
         <div id="errorMessages" class="error"></div>

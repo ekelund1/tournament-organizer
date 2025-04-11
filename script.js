@@ -4,11 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const teamNamesInput = document.getElementById('teamNames');
     const numGroupsInput = document.getElementById('numGroups');
     const assignRefsCheckbox = document.getElementById('assignRefs');
+    const shortenGroupStageCheckbox = document.getElementById('shortenGroupStage'); // <-- New Checkbox
     const generateButton = document.getElementById('generateButton');
     const tournamentOutput = document.getElementById('tournamentOutput');
     const errorMessagesDiv = document.getElementById('errorMessages');
     const goToGroupStageBtn = document.getElementById('goToGroupStageBtn');
-    const clearTournamentBtn = document.getElementById('clearTournamentBtn'); // Clear Button Ref
+    const clearTournamentBtn = document.getElementById('clearTournamentBtn');
 
     // --- Constants for LocalStorage Keys ---
     const LS_KEYS = {
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         TEAM_NAMES: 'tournament_teamNames',
         NUM_GROUPS: 'tournament_numGroups',
         ASSIGN_REFS: 'tournament_assignRefs',
+        SHORTEN_GROUP_STAGE: 'tournament_shortenGroupStage', // <-- New Key
         TOURNAMENT_DATA: 'tournament_data' // Main data structure
     };
 
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function snakeSeeding(teams, numGroups) {
+        // ... (no changes needed in this function)
         if (!Array.isArray(teams) || typeof numGroups !== 'number' || numGroups <= 0 || teams.length === 0 || numGroups > teams.length) {
             return [];
         }
@@ -55,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateGroupMatchPairs(groupTeams) {
+        // ... (no changes needed in this function)
         if (!Array.isArray(groupTeams)) return [];
         const matchPairs = [];
         const teams = [...groupTeams];
@@ -76,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function assignReferee(matchPair, allGroupTeams, refereeCounts) {
+        // ... (no changes needed in this function)
         if (!Array.isArray(matchPair) || !Array.isArray(allGroupTeams) || typeof refereeCounts !== 'object') return null;
         const availableTeams = allGroupTeams.filter(team => !matchPair.includes(team));
         if (availableTeams.length === 0) return null;
@@ -89,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayTournament(tournamentData, shouldDisplayRefs) {
+        // ... (no major changes needed, but ensure group name is displayed correctly)
         tournamentOutput.innerHTML = '';
         goToGroupStageBtn.disabled = true; // Disable by default
 
@@ -104,13 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let groupsDisplayed = 0; // Keep track if any groups are actually shown
 
         tournamentData.groups.forEach((group) => {
-            if (!group || typeof group !== 'object' || !Array.isArray(group.teams) || !Array.isArray(group.matches)) {
-                return; // Skip invalid group
-            }
+             // Check group validity slightly differently as group might just contain settings
+             if (!group || typeof group !== 'object' || !Array.isArray(group.teams) || !Array.isArray(group.matches)) {
+                 console.warn("Skipping invalid group structure during display:", group);
+                 return;
+             }
             groupsDisplayed++; // Increment count for valid group structure
 
             const groupDiv = document.createElement('div'); groupDiv.className = 'group';
-            const groupTitle = document.createElement('h3'); groupTitle.textContent = group.name || 'Unnamed Group'; groupDiv.appendChild(groupTitle);
+            const groupTitle = document.createElement('h3');
+            // Check if group.name exists, otherwise fallback
+            groupTitle.textContent = group.name || 'Unnamed Group';
+            groupDiv.appendChild(groupTitle);
+
             const teamsTitle = document.createElement('h4'); teamsTitle.textContent = 'Teams'; groupDiv.appendChild(teamsTitle);
             const teamList = document.createElement('ul');
             group.teams.forEach(teamName => { const listItem = document.createElement('li'); listItem.textContent = teamName; teamList.appendChild(listItem); });
@@ -123,8 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!match || typeof match !== 'object' || !match.team1 || !match.team2) return; // Skip invalid match
                     const listItem = document.createElement('li'); listItem.className = 'match-pair';
                     let matchText = `${match.team1} vs ${match.team2}`;
-                    if (shouldDisplayRefs && match.referee) {
-                         matchText = matchText.padEnd(30);
+                    // Check assignRefs setting specifically from tournamentData if available
+                    const assignRefsEnabled = tournamentData.assignRefs ?? shouldDisplayRefs;
+                    if (assignRefsEnabled && match.referee) {
+                         matchText = matchText.padEnd(30); // Keep padding consistent
                          matchText += `<span class="referee">(Ref: ${match.referee})</span>`;
                     }
                     listItem.innerHTML = matchText;
@@ -141,12 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     function saveState(settings, tournamentData) {
         try {
             localStorage.setItem(LS_KEYS.NUM_TEAMS, settings.numTeams);
             localStorage.setItem(LS_KEYS.TEAM_NAMES, settings.teamNames);
             localStorage.setItem(LS_KEYS.NUM_GROUPS, settings.numGroups);
             localStorage.setItem(LS_KEYS.ASSIGN_REFS, settings.assignRefs);
+            localStorage.setItem(LS_KEYS.SHORTEN_GROUP_STAGE, settings.shortenGroupStage); // <-- Save new setting
 
             if (tournamentData && typeof tournamentData === 'object' && Array.isArray(tournamentData.groups)) {
                  // Ensure no lingering playoff data from previous versions if structure changed
@@ -169,17 +185,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const savedTeamNames = localStorage.getItem(LS_KEYS.TEAM_NAMES);
             const savedNumGroups = localStorage.getItem(LS_KEYS.NUM_GROUPS);
             const savedAssignRefs = localStorage.getItem(LS_KEYS.ASSIGN_REFS) === 'true';
+            const savedShorten = localStorage.getItem(LS_KEYS.SHORTEN_GROUP_STAGE) === 'true'; // <-- Load new setting
             const savedTournamentDataJSON = localStorage.getItem(LS_KEYS.TOURNAMENT_DATA);
 
             if (savedNumTeams) numTeamsInput.value = savedNumTeams;
             if (savedTeamNames) teamNamesInput.value = savedTeamNames;
             if (savedNumGroups) numGroupsInput.value = savedNumGroups;
             assignRefsCheckbox.checked = savedAssignRefs;
+            shortenGroupStageCheckbox.checked = savedShorten; // <-- Set checkbox state
 
             if (savedTournamentDataJSON) {
                 const savedTournamentData = JSON.parse(savedTournamentDataJSON);
+                 // Pass the specific assignRefs setting from the saved data if available
+                 const displayRefs = savedTournamentData?.assignRefs ?? savedAssignRefs;
                  if (savedTournamentData && Array.isArray(savedTournamentData.groups)) {
-                     displayTournament(savedTournamentData, savedAssignRefs);
+                     displayTournament(savedTournamentData, displayRefs);
                  } else {
                       localStorage.removeItem(LS_KEYS.TOURNAMENT_DATA); // Clear invalid data
                       tournamentOutput.innerHTML = '';
@@ -203,12 +223,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const teamNamesRaw = teamNamesInput.value.trim();
         const numGroups = parseInt(numGroupsInput.value, 10);
         const assignRefs = assignRefsCheckbox.checked;
+        const shortenGroupStage = shortenGroupStageCheckbox.checked; // <-- Get new setting state
 
         const currentSettings = {
              numTeams: numTeamsInput.value,
              teamNames: teamNamesInput.value,
              numGroups: numGroupsInput.value,
              assignRefs: assignRefs,
+             shortenGroupStage: shortenGroupStage // <-- Include in settings for saving
         };
 
         // Validation
@@ -228,6 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
             numTeams: numTeams,
             teamNames: teams,
             numGroups: numGroups,
+            assignRefs: assignRefs, // Store setting in main data
+            shortenGroupStage: shortenGroupStage, // <-- Store new setting in main data
             groups: [],
         };
 
@@ -243,9 +267,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     let referee = null;
                     if (assignRefs) { referee = assignReferee(pair, groupTeams, refereeCounts); }
                     // Initialize results structure for compatibility with group_stage.js
+                    // Add the new set_points fields, initialized to 0
                     return {
                         team1: pair[0], team2: pair[1], referee: referee,
-                        results: { sets: [ [null, null], [null, null], [null, null] ], team1_sets_won: 0, team2_sets_won: 0, team1_match_points: 0, team2_match_points: 0, team1_point_diff: 0, team2_point_diff: 0, is_complete: false }
+                        results: {
+                            sets: [ [null, null], [null, null], [null, null] ], // Keep 3 sets structure for data storage
+                            team1_sets_won: 0,
+                            team2_sets_won: 0,
+                            team1_match_points: 0, // Used in normal mode
+                            team2_match_points: 0, // Used in normal mode
+                            team1_set_points: 0,   // <-- New: Used in shortened mode
+                            team2_set_points: 0,   // <-- New: Used in shortened mode
+                            team1_point_diff: 0,
+                            team2_point_diff: 0,
+                            is_complete: false
+                        }
                     };
                 });
                 tournamentData.groups.push({ name: `Group ${groupLetter}`, teams: groupTeams, matches: detailedMatches });
@@ -255,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         displayTournament(tournamentData, assignRefs); // Display generated structure
-        saveState(currentSettings, tournamentData); // Save the state
+        saveState(currentSettings, tournamentData); // Save the state (includes new setting)
     }
 
     // --- Clear Tournament Function ---
@@ -263,17 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.confirm("Are you sure you want to clear ALL tournament data?\nThis cannot be undone.")) {
             console.log("Clearing tournament data...");
             try {
+                 // This loop automatically includes the new LS_KEYS.SHORTEN_GROUP_STAGE
                  Object.values(LS_KEYS).forEach(key => {
                      console.log(`Removing localStorage key: ${key}`);
                      localStorage.removeItem(key);
                  });
-                // Force reload of setup page to reflect cleared state
-                 window.location.reload();
-                // Alternative: Clear form fields manually and output area
-                // numTeamsInput.value = ''; /* etc. */
-                // tournamentOutput.innerHTML = '';
-                // goToGroupStageBtn.disabled = true;
-                // displayError("Tournament data cleared."); // Give feedback
+                window.location.reload();
             } catch (e) {
                 console.error("Error clearing localStorage:", e);
                 displayError("Failed to clear tournament data.");
@@ -288,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dataExists) { window.location.href = 'group_stage.html'; }
         else { displayError("Cannot navigate: Tournament data not generated or saved."); }
     });
-    clearTournamentBtn.addEventListener('click', handleClearTournament); // Added listener
+    clearTournamentBtn.addEventListener('click', handleClearTournament);
 
     // --- Initial Load ---
     loadState();
